@@ -36,7 +36,6 @@ class DecoderRNN(nn.Module):
         """Decode image feature vectors and generates captions."""
         embeddings = self.embed(captions)
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
-        # packed = pack_padded_sequence(embeddings, self.vocab_size, batch_first=True) 
         hiddens, _ = self.lstm(embeddings)
         outputs = self.linear(hiddens)
         return outputs
@@ -45,8 +44,7 @@ class DecoderRNN(nn.Module):
         " accepts pre-processed image tensor (inputs) and returns predicted sentence (list of tensor ids of length max_len) "
         sampled_ids = []
         print(inputs.size())
-#         inputs = inputs.unsqueeze(1)
-#         print(inputs.size())
+
         for i in range(20):
             hiddens, states = self.lstm(inputs, states)          # hiddens: (batch_size, 1, hidden_size)
             outputs = self.linear(hiddens.squeeze(1))            # outputs:  (batch_size, vocab_size)
@@ -54,5 +52,4 @@ class DecoderRNN(nn.Module):
             sampled_ids.append(predicted[0].item())
             inputs = self.embed(predicted)                       # inputs: (batch_size, embed_size)
             inputs = inputs.unsqueeze(1)                         # inputs: (batch_size, 1, embed_size)
-        # sampled_ids = torch.stack(sampled_ids, 1)                # sampled_ids: (batch_size, max_seq_length)
         return sampled_ids
